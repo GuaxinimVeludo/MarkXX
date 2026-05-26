@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lista de Alunos</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #1a1a2e;
+      --ink-light:  #4a4a6a;
+      --paper:      #f9f7f4;
+      --cream:      #f0ece5;
+      --rule:       #e4dfd8;
+      --accent:     #c9603a;
+      --accent-dim: #f0d9cf;
+      --green:      #2d7a5f;
+      --green-dim:  #d0ede5;
+      --radius:     10px;
+      --shadow:     0 4px 24px rgba(26,26,46,.08);
+      --shadow-md:  0 8px 40px rgba(26,26,46,.13);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 0 16px 80px;
+    }
+
+    /* ─── Header ────────────────────────────────────────────────── */
+    header {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 56px 0 32px;
+      border-bottom: 2px solid var(--ink);
+    }
+
+    .header-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 6vw, 3rem);
+      line-height: 1.1;
+      color: var(--ink);
+    }
+
+    header h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    header p {
+      margin-top: 12px;
+      font-size: 15px;
+      color: var(--ink-light);
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    /* ─── Main layout ───────────────────────────────────────────── */
+    main {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* ─── Card ──────────────────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border: 1px solid var(--rule);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-top: 32px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-header-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: grid; place-items: center;
+      font-size: 16px;
+    }
+
+    .card-header-icon.orange { background: var(--accent-dim); }
+    .card-header-icon.green  { background: var(--green-dim); }
+
+    .card-header h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+    }
+
+    .card-body { padding: 24px; }
+
+    /* ─── Form ──────────────────────────────────────────────────── */
+    .form-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .input-wrap {
+      flex: 1 1 200px;
+      position: relative;
+    }
+
+    .input-wrap input {
+      width: 100%;
+      padding: 12px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      border: 1.5px solid var(--rule);
+      border-radius: var(--radius);
+      background: var(--paper);
+      color: var(--ink);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .input-wrap input::placeholder { color: #b0abc5; }
+
+    .input-wrap input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+      background: #fff;
+    }
+
+    button {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      cursor: pointer;
+      border: none;
+      border-radius: var(--radius);
+      transition: transform .15s, box-shadow .15s, opacity .2s;
+    }
+
+    button:active { transform: translateY(1px); }
+
+    .btn-primary {
+      padding: 12px 24px;
+      background: var(--ink);
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .btn-primary:hover { box-shadow: var(--shadow-md); opacity: .9; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ─── Status message ────────────────────────────────────────── */
+    .status {
+      margin-top: 14px;
+      font-size: 13.5px;
+      font-weight: 500;
+      min-height: 22px;
+      border-radius: 6px;
+      padding: 0 4px;
+      transition: opacity .3s;
+    }
+
+    .status.success { color: var(--green); }
+    .status.error   { color: #c0392b; }
+    .status.loading { color: var(--ink-light); }
+
+    /* ─── Table ─────────────────────────────────────────────────── */
+    .table-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 24px 8px;
+    }
+
+    .badge {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .btn-refresh {
+      padding: 6px 14px;
+      background: var(--cream);
+      color: var(--ink-light);
+      border: 1px solid var(--rule);
+      font-size: 13px;
+    }
+
+    .btn-refresh:hover { background: var(--rule); color: var(--ink); }
+
+    .table-scroll { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      border-bottom: 1.5px solid var(--rule);
+      background: var(--cream);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--rule);
+      transition: background .15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+
+    /* Zebra */
+    tbody tr:nth-child(even) { background: #faf9f7; }
+    tbody tr:hover { background: var(--accent-dim); }
+
+    tbody td {
+      padding: 12px 16px;
+      color: var(--ink);
+      vertical-align: middle;
+    }
+
+    .td-num {
+      color: var(--ink-light);
+      font-size: 12px;
+      font-weight: 600;
+      width: 40px;
+    }
+
+    .td-name { font-weight: 500; }
+
+    .td-date {
+      color: var(--ink-light);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      margin-right: 10px;
+      flex-shrink: 0;
+      vertical-align: middle;
+    }
+
+    /* Empty & skeleton states */
+    .empty-state {
+      padding: 40px 24px;
+      text-align: center;
+      color: var(--ink-light);
+      font-size: 14px;
+    }
+
+    .empty-state span { display: block; font-size: 28px; margin-bottom: 8px; }
+
+    .skeleton-row td { padding: 12px 16px; }
+
+    .skeleton-cell {
+      height: 14px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--cream) 25%, var(--rule) 50%, var(--cream) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ─── Config banner ─────────────────────────────────────────── */
+    .config-banner {
+      background: #fff8f0;
+      border: 1.5px dashed var(--accent);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-top: 32px;
+      font-size: 13.5px;
+      color: var(--ink);
+      line-height: 1.7;
+    }
+
+    .config-banner strong { color: var(--accent); }
+
+    .config-banner code {
+      background: var(--accent-dim);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 12.5px;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ─── Footer ────────────────────────────────────────────────── */
+    footer {
+      max-width: 680px;
+      margin: 40px auto 0;
+      padding-top: 20px;
+      border-top: 1px solid var(--rule);
+      font-size: 12px;
+      color: var(--ink-light);
+      text-align: center;
+    }
+
+    /* ─── Responsive ────────────────────────────────────────────── */
+    @media (max-width: 480px) {
+      header { padding: 36px 0 24px; }
+      .card-body { padding: 18px; }
+      .td-date { display: none; }
+      .table-meta { padding: 12px 18px 6px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── HEADER ──────────────────────────────────────────────────── -->
+  <header>
+    <p class="header-eyebrow">Gestão Escolar</p>
+    <h1>Lista de <em>Alunos</em></h1>
+    <p>Cadastre e consulte alunos em tempo real. Dados salvos no Google Planilhas via Apps Script.</p>
+  </header>
+
+  <!-- ── CONFIG BANNER (visível até URL ser preenchida) ──────────── -->
+  <main>
+    <div class="config-banner" id="configBanner">
+      ⚙️ <strong>Configure antes de usar:</strong> edite a constante <code>CONFIG.url</code>
+      no &lt;script&gt; deste arquivo e cole a URL gerada ao implantar o <code>Code.gs</code>
+      como Web App no Google Apps Script
+      (<em>Executar como: Eu · Acesso: Qualquer pessoa</em>).
+    </div>
+
+    <!-- ── CADASTRO ────────────────────────────────────────────────── -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon orange">✏️</div>
+        <h2>Novo Aluno</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="input-wrap">
+            <input
+              type="text"
+              id="studentName"
+              placeholder="Digite o nome completo…"
+              maxlength="120"
+              autocomplete="off"
+            />
+          </div>
+          <button class="btn-primary" id="saveBtn" onclick="addStudent()">
+            Salvar
+          </button>
+        </div>
+        <div class="status" id="formStatus"></div>
+      </div>
+    </div>
+
+    <!-- ── LISTA ───────────────────────────────────────────────────── -->
+    <div class="card" style="margin-top:24px;">
+      <div class="card-header">
+        <div class="card-header-icon green">📋</div>
+        <h2>Alunos Cadastrados</h2>
+      </div>
+
+      <div class="table-meta">
+        <span class="badge" id="countBadge">— alunos</span>
+        <button class="btn-refresh" onclick="loadStudents()">↺ Atualizar</button>
+      </div>
+
+      <div class="table-scroll">
+        <table id="studentsTable">
+          <thead>
+            <tr>
+              <th class="td-num">#</th>
+              <th>Nome</th>
+              <th class="td-date">Cadastrado em</th>
+            </tr>
+          </thead>
+          <tbody id="studentsBody">
+            <!-- skeleton inicial -->
+            <tr class="skeleton-row">
+              <td><div class="skeleton-cell" style="width:20px"></div></td>
+              <td><div class="skeleton-cell" style="width:60%"></div></td>
+              <td><div class="skeleton-cell" style="width:80px"></div></td>
+            </tr>
+            <tr class="skeleton-row">
+              <td><div class="skeleton-cell" style="width:20px"></div></td>
+              <td><div class="skeleton-cell" style="width:45%"></div></td>
+              <td><div class="skeleton-cell" style="width:80px"></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Dados armazenados no Google Planilhas · Sem CORS via JSONP
+  </footer>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       JAVASCRIPT
+       ══════════════════════════════════════════════════════════════ -->
+  <script>
+    // ┌─────────────────────────────────────────────────────────────┐
+    // │  CONFIGURAÇÃO — cole aqui a URL do seu Web App              │
+    // │  Exemplo:                                                   │
+    // │  https://script.google.com/macros/s/AKfycb…/exec           │
+    // └─────────────────────────────────────────────────────────────┘
+    const CONFIG = {
+      url: '' // ← COLE SUA URL AQUI
+    };
+
+    // ── Helpers ──────────────────────────────────────────────────
+    const $ = id => document.getElementById(id);
+
+    function setStatus(msg, type = '') {
+      const el = $('formStatus');
+      el.textContent = msg;
+      el.className = 'status ' + type;
+    }
+
+    function formatDate(isoStr) {
+      if (!isoStr) return '—';
+      try {
+        return new Date(isoStr).toLocaleDateString('pt-BR', {
+          day: '2-digit', month: 'short', year: 'numeric'
+        });
+      } catch { return isoStr; }
+    }
+
+    function initials(name) {
+      const parts = name.trim().split(' ');
+      return parts.length >= 2
+        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+        : name.substring(0, 2).toUpperCase();
+    }
+
+    // ── Verificação de configuração ───────────────────────────────
+    function isConfigured() {
+      return CONFIG.url && CONFIG.url.startsWith('https://script.google.com');
+    }
+
+    // ── JSONP helper ──────────────────────────────────────────────
+    // Evita bloqueio de CORS injetando um <script> dinâmico.
+    // O Apps Script responde com: callback({...})
+    let _cbCounter = 0;
+
+    function jsonp(params) {
+      return new Promise((resolve, reject) => {
+        const cbName = '__gsCallback_' + (++_cbCounter);
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error('Timeout — verifique a URL do Web App'));
+        }, 15000);
+
+        window[cbName] = data => {
+          cleanup();
+          resolve(data);
+        };
+
+        function cleanup() {
+          clearTimeout(timeout);
+          delete window[cbName];
+          if (script.parentNode) script.parentNode.removeChild(script);
+        }
+
+        const qs = new URLSearchParams({ ...params, callback: cbName });
+        const script = document.createElement('script');
+        script.src = CONFIG.url + '?' + qs.toString();
+        script.onerror = () => { cleanup(); reject(new Error('Erro ao carregar script')); };
+        document.head.appendChild(script);
+      });
+    }
+
+    // ── Renderizar tabela ─────────────────────────────────────────
+    function renderTable(students) {
+      const tbody = $('studentsBody');
+      $('countBadge').textContent = students.length + (students.length === 1 ? ' aluno' : ' alunos');
+
+      if (!students.length) {
+        tbody.innerHTML = `
+          <tr><td colspan="3">
+            <div class="empty-state">
+              <span>🎓</span>
+              Nenhum aluno cadastrado ainda.
+            </div>
+          </td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = students.map((s, i) => `
+        <tr>
+          <td class="td-num">${i + 1}</td>
+          <td class="td-name">
+            <span class="avatar">${initials(s.Nome)}</span>${s.Nome}
+          </td>
+          <td class="td-date">${formatDate(s.CriadoEm)}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ── Carregar lista ────────────────────────────────────────────
+    async function loadStudents() {
+      if (!isConfigured()) {
+        $('studentsBody').innerHTML = `
+          <tr><td colspan="3">
+            <div class="empty-state">
+              <span>⚙️</span>
+              Configure a URL do Web App para ver os dados.
+            </div>
+          </td></tr>`;
+        $('countBadge').textContent = '— alunos';
+        return;
+      }
+
+      $('configBanner').style.display = 'none';
+      $('countBadge').textContent = 'carregando…';
+
+      try {
+        const data = await jsonp({ action: 'list' });
+        if (data.success) {
+          renderTable(data.students || []);
+        } else {
+          throw new Error(data.error || 'Erro desconhecido');
+        }
+      } catch (err) {
+        $('studentsBody').innerHTML = `
+          <tr><td colspan="3">
+            <div class="empty-state" style="color:#c0392b">
+              <span>⚠️</span>
+              Erro ao carregar: ${err.message}
+            </div>
+          </td></tr>`;
+        $('countBadge').textContent = 'erro';
+      }
+    }
+
+    // ── Adicionar aluno ───────────────────────────────────────────
+    async function addStudent() {
+      const input = $('studentName');
+      const name  = input.value.trim();
+
+      if (!name) {
+        setStatus('⚠ Digite um nome antes de salvar.', 'error');
+        input.focus();
+        return;
+      }
+
+      if (!isConfigured()) {
+        setStatus('⚠ Configure a URL do Web App primeiro.', 'error');
+        return;
+      }
+
+      const btn = $('saveBtn');
+      btn.disabled = true;
+      setStatus('Salvando…', 'loading');
+
+      try {
+        const data = await jsonp({ action: 'add', nome: name });
+        if (data.success) {
+          input.value = '';
+          setStatus('✓ Aluno salvo com sucesso!', 'success');
+          await loadStudents();
+          setTimeout(() => setStatus(''), 4000);
+        } else {
+          throw new Error(data.error || 'Erro desconhecido');
+        }
+      } catch (err) {
+        setStatus('✗ ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // ── Enter para salvar ─────────────────────────────────────────
+    $('studentName').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addStudent();
+    });
+
+    // ── Inicialização ─────────────────────────────────────────────
+    if (!isConfigured()) {
+      $('configBanner').style.display = '';
+    } else {
+      $('configBanner').style.display = 'none';
+    }
+    loadStudents();
+  </script>
+</body>
+</html>
